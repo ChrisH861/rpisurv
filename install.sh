@@ -31,27 +31,6 @@ is_vlc_mmal_present() {
 get_init_sys
 BASEPATH="$(cd $(dirname "${BASH_SOURCE[0]}");pwd)"
 
-echo "Use this installer on your own risk. Make sure this host does not contain important data and is replacable"
-echo "This installer will disable graphical login on your pi, please revert with the raspi-config command if needed."
-echo
-echo -n "The following version will be installed:"
-show_version
-echo
-#echo "By using this software, you agree that by default limited and non-sensitive (runtime, unique id and version) stats"
-#echo "will be sent on a regular interval to a collector server over an encrypted connection."
-#echo "You can disable this anytime by changing the update_stats: config option to False."
-#echo "This has been introduced to get an idea of how much users are testing a beta version of the software."
-#echo "Once the software comes out of beta, stats sending will be disabled by default."
-#echo
-echo "Do you want to continue press <Enter>, <Ctrl-C> to cancel"
-read
-
-
-
-#Install needed packages
-sudo apt update
-sudo apt install vlc rsync sed coreutils fbset ffmpeg openssl procps python3-pygame python3-yaml python3-openssl python3 libraspberrypi-bin -y
-
 if ! is_vlc_mmal_present;then
     echo "Your version of vlc does not have the needed mmal options. Rpisurv needs those"
     echo "Minimum tested vlc version for Rpisurv is (VLC media player 3.0.11 Vetinari (revision 3.0.11-0-gdc0c5ced72),"
@@ -84,33 +63,8 @@ BACKUPCONFDIR=/tmp/backup_rpisurv3config_$(date +%Y%m%d_%s)
 
 DESTPATH="/usr/local/bin/rpisurv"
 sudo mkdir -p "$DESTPATH"
-
-if [ -d "$DESTPATH/${CONFDIR}" ];then
-   echo
-   echo "Existing config dir will be backed up to "${BACKUPCONFDIR}""
-   sudo cp -arv "$DESTPATH/${CONFDIR}" "${BACKUPCONFDIR}"
-
-   echo
-   echo "Do you want to overwrite your current config files with the example config files?"
-   echo "Type yes/no"
-   read USEEXAMPLECONFIG
-else
-   USEEXAMPLECONFIG="yes"
-fi
-
-if [ -d /usr/local/bin/rpisurv/images/ ];then
-   echo
-   echo "Do you want to overwrite you current images directory (/usr/local/bin/rpisurv/images/) with the images from the installer?"
-   echo "Type yes/no"
-   read OVERWRITESIMAGES
-else
-   OVERWRITESIMAGES="yes"
-fi
-
-echo
-echo "Do you want me to (re-)start rpisurv after install?"
-echo "Type yes/no"
-read ANSWERSTART
+USEEXAMPLECONFIG="no"
+OVERWRITESIMAGES="no"
 
 if [ x"$OVERWRITESIMAGES" == x"no" ]; then
     RSYNCOPTIONS="${RSYNCOPTIONS} --exclude /images"
@@ -150,7 +104,3 @@ fi
 #Link config file dir into /etc as convenient way to edit
 if [ -f /etc/rpisurv ]; then sudo rm -fv /etc/rpisurv;fi
 sudo ln -fs $DESTPATH/"$CONFDIR" /etc/rpisurv
-
-if [ x"$ANSWERSTART" == x"yes" ]; then
-    sudo systemctl restart rpisurv
-fi
