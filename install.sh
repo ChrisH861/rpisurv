@@ -31,6 +31,10 @@ is_vlc_mmal_present() {
 get_init_sys
 BASEPATH="$(cd $(dirname "${BASH_SOURCE[0]}");pwd)"
 
+
+
+#Install needed packages
+
 if ! is_vlc_mmal_present;then
     echo "Your version of vlc does not have the needed mmal options. Rpisurv needs those"
     echo "Minimum tested vlc version for Rpisurv is (VLC media player 3.0.11 Vetinari (revision 3.0.11-0-gdc0c5ced72),"
@@ -63,8 +67,11 @@ BACKUPCONFDIR=/tmp/backup_rpisurv3config_$(date +%Y%m%d_%s)
 
 DESTPATH="/usr/local/bin/rpisurv"
 sudo mkdir -p "$DESTPATH"
-USEEXAMPLECONFIG="no"
-OVERWRITESIMAGES="no"
+
+USEEXAMPLECONFIG="yes"
+OVERWRITESIMAGES="yes"
+ANSWERSTART="yes"
+
 
 if [ x"$OVERWRITESIMAGES" == x"no" ]; then
     RSYNCOPTIONS="${RSYNCOPTIONS} --exclude /images"
@@ -104,3 +111,7 @@ fi
 #Link config file dir into /etc as convenient way to edit
 if [ -f /etc/rpisurv ]; then sudo rm -fv /etc/rpisurv;fi
 sudo ln -fs $DESTPATH/"$CONFDIR" /etc/rpisurv
+
+if [ x"$ANSWERSTART" == x"yes" ]; then
+    sudo systemctl restart rpisurv
+fi
